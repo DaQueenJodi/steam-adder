@@ -1,3 +1,4 @@
+#include "shortcuts.h"
 #include "vdf.h"
 #include <gtk/gtk.h>
 #include <libgen.h>
@@ -15,7 +16,7 @@ static void add_steam_entry(GtkWidget *widget, gpointer *data) {
   }
   char *dir = dirname(file_name);
 
-  VDFNode *node = vdf_deserialize("test.vdf");
+  //  VDFNode *node = vdf_deserialize("test.vdf");
   // vdf_print_children(node);
   //	node_clean(node);
 }
@@ -35,9 +36,39 @@ static void choose_file(GtkWidget *widget, gpointer data) {
 }
 
 int main(void) {
-  VDFNode *node = vdf_deserialize("test.vdf");
-  vdf_print_children(node, 0);
-  // vdf_clean(node);
+  // VDFNode *node = vdf_deserialize("test.vdf");
+  // vdf_print_children(node, 0);
+  //  vdf_clean(node);
+
+  Shortcut s;
+  s.appid = 2871305054;
+  s.app_name = "RainWorld.exe";
+  s.exe = "/hdd/Documents/NotPiracy/Games/Rain.World/Game/files/RainWorld.exe";
+  s.start_dir = "/hdd/Documents/NotPiracy/Games/Rain.World/games/files/";
+  s.icon = "";
+  s.shortcut_path = "";
+  s.launch_options = "";
+  s.is_hidden = 0;
+  s.allow_desktop_config = 1;
+  s.allow_overlay = 1;
+  s.openvr = 0;
+  s.devkit = 0;
+  s.devkit_game_id = "";
+  s.devkit_override_app_id = 0;
+  s.last_play_time = 0;
+  s.flatpak_app_id = "";
+  char *tags[] = {"favorite"};
+  s.tags = (Tags){.tags = tags, .size = 1};
+
+  Shortcuts ss;
+  ss.buff = malloc(sizeof(Shortcut *));
+  ss.buff[0] = &s;
+  ss.capacity = 1;
+  ss.len = 1;
+
+	VDFNode *n = shortcuts_to_vdf(&ss);
+	vdf_print_children(n, 0);
+	vdf_serialize(n, "out.vdf");
 }
 
 int main2(int argc, char **argv) {
@@ -60,4 +91,6 @@ int main2(int argc, char **argv) {
 
   gtk_widget_show_all(window);
   gtk_main();
+
+	return 0;
 }

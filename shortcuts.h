@@ -2,6 +2,11 @@
 #include "vdf.h"
 
 typedef struct {
+  size_t size;
+  char **tags;
+} Tags;
+
+typedef struct {
   uint32_t appid;
   char *app_name;
   char *exe;
@@ -19,11 +24,11 @@ typedef struct {
   uint32_t devkit_override_app_id;
   uint32_t last_play_time;
   char *flatpak_app_id;
-  char *tags;
+  Tags tags;
 } Shortcut;
 
 typedef struct {
-  Shortcut *buff;
+  Shortcut **buff;
   size_t len;
   size_t capacity;
 } Shortcuts;

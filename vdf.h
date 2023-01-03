@@ -49,10 +49,12 @@ typedef struct VDFNode {
   struct VDFNode **child_nodes;
 } VDFNode;
 
-uint8_t *vdf_serialize(VDFItem **items);
+void vdf_serialize(VDFNode *n, char *path);
 char *vdf_type_str(VDFItemType type);
 VDFNode *vdf_deserialize(char *path);
 void vdf_print_children(VDFNode *n, size_t deepness);
 
-VDFNode *new_node(void);
-void vdf_clean(VDFNode *n);
+VDFNode *vdf_new_node(void);
+void vdf_node_add_child(VDFNode *n, VDFNode *c);
+void vdf_node_add_item(VDFNode *n, VDFItem item);
+void vdf_free(VDFNode *n);
