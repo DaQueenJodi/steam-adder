@@ -45,14 +45,14 @@ typedef struct VDFNode {
   VDFKey name;
   VDFItem *items;
   size_t item_count;
-	size_t child_node_count;
+  size_t child_node_count;
   struct VDFNode **child_nodes;
 } VDFNode;
 
 uint8_t *vdf_serialize(VDFItem **items);
 char *vdf_type_str(VDFItemType type);
 VDFNode *vdf_deserialize(char *path);
-void vdf_print(VDFNode *n);
+void vdf_print_children(VDFNode *n, size_t deepness);
 
 VDFNode *new_node(void);
-void node_clean(VDFNode *n);
+void vdf_clean(VDFNode *n);

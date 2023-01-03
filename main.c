@@ -16,8 +16,8 @@ static void add_steam_entry(GtkWidget *widget, gpointer *data) {
   char *dir = dirname(file_name);
 
   VDFNode *node = vdf_deserialize("test.vdf");
-	vdf_print(node);
-	//	node_clean(node);
+  // vdf_print_children(node);
+  //	node_clean(node);
 }
 
 static void choose_file(GtkWidget *widget, gpointer data) {
@@ -36,7 +36,8 @@ static void choose_file(GtkWidget *widget, gpointer data) {
 
 int main(void) {
   VDFNode *node = vdf_deserialize("test.vdf");
-  vdf_print(node);
+  vdf_print_children(node, 0);
+  // vdf_clean(node);
 }
 
 int main2(int argc, char **argv) {

@@ -33,52 +33,6 @@ typedef enum {
   DoneWithNode,
 } NextStatus;
 
-static int next_shortcut_item(uint8_t **buff, VDFItem *item) {
-
-  VDFItemType type = (VDFItemType) * *buff;
-  *buff += 1;
-
-  if (type == PACKTYPE_NONE) {
-    return MakeChildNode;
-  }
-  if (type == PACKTYPE_NULLMARKER) {
-    return DoneWithNode;
-  }
-  item->v.type = type;
-  item->k = read_str(buff);
-
-  switch (type) {
-  case PACKTYPE_STRING: {
-    item->v.data.string = read_str(buff);
-    break;
-  }
-  case PACKTYPE_WSTRING: {
-    assert(0 && "not implemented");
-  }
-  case PACKTYPE_INT: {
-    item->v.data.u32 = read_int(buff);
-    break;
-  }
-
-  default: {
-    fprintf(stderr, "unknown packtype: %x\n", type);
-    exit(1);
-  }
-  }
-  return Nothing;
-}
-
-void fill_node(VDFNode *node, uint8_t **buff) {
-  NextStatus status;
-  while ((status = next_shortcut_item(buff, &node->items[node->item_count])) !=
-         DoneWithNode) {
-    if (status == MakeChildNode) {
-      // node->child_nodes[node->child_node_count++] = new_node(read_str(buff));
-      fill_node(node->child_nodes[node->child_node_count++], buff);
-    }
-    node->item_count += 1;
-  }
-}
 static void parse_file(VDFNode *node, uint8_t **buff);
 
 VDFNode *vdf_deserialize(char *path) {
@@ -106,35 +60,43 @@ VDFNode *vdf_deserialize(char *path) {
   return node;
 }
 
-void vdf_print(VDFNode *node) {
-  while (node != NULL) {
-    printf("%s:\n", node->name);
-    for (size_t node_i = 0; node_i < node->child_node_count; node_i++) {
-      for (size_t item_i = 0; item_i < node->item_count; item_i++) {
-        VDFItem item = node->items[item_i];
-        if (item.k == NULL) { // go to child node
-          break;
-        }
-        printf("  %s: ", item.k);
-        switch (item.v.type) {
-        case PACKTYPE_INT: {
-          printf("%u\n", item.v.data.u32);
-          break;
-        }
-        case PACKTYPE_STRING: {
-          printf("%s\n", item.v.data.string);
-          break;
-        }
-        default:
-          fprintf(stderr, "unexpected packtype: %s\n",
-                  vdf_type_str(item.v.type));
-          exit(1);
-        }
+void vdf_print_children(VDFNode *node, size_t deepness) {
+  char *seperator = malloc(sizeof("  ") * deepness);
+  memset(seperator, 0x20, sizeof("  ") * deepness);
+
+  for (size_t i = 0; i < node->child_node_count; i++) {
+    VDFNode *n = node->child_nodes[i];
+    printf("%s%s {\n", seperator, n->name);
+    if (n->item_count == 0) {
+      printf(" %s[EMPTY]\n", seperator);
+    }
+    for (size_t i = 0; i < n->item_count; i++) {
+      VDFItem *item = &n->items[i];
+      if (item->v.type == PACKTYPE_NONE) {
+        continue; // skip packtype none
+      }
+      printf("%s  %s: ", seperator, item->k);
+      switch (item->v.type) {
+      case PACKTYPE_INT: {
+        printf("%u\n", item->v.data.u32);
+        break;
+      }
+      case PACKTYPE_STRING: {
+        printf("%s\n", item->v.data.string);
+        break;
+      }
+      default: {
+        fprintf(stderr, "unknown packtype, %s", vdf_type_str(item->v.type));
+        exit(1);
+      }
       }
     }
+    vdf_print_children(n, deepness + 1);
+    printf("%s}\n", seperator); // close the bracket we opened at the start
+                                // free(seperator);
   }
+  free(seperator);
 }
-
 char *vdf_type_str(VDFItemType type) {
   // clang-format off
   switch (type) {
@@ -147,7 +109,6 @@ char *vdf_type_str(VDFItemType type) {
 	  fprintf(stderr, "unknown: %x \n", type);
 		exit(1);
   }
-
   // clang-format on
 }
 
@@ -162,10 +123,20 @@ VDFNode *new_node(void) {
   n->items = calloc(sizeof(VDFItem), 25);
   return n;
 }
-// this function does NOT recurse
-static void free_node(VDFNode *n) {}
-
-void vdf_clean(VDFNode *n) {}
+// TODO: make this work
+void vdf_clean(VDFNode *node) {
+  for (size_t i = 0; i < node->child_node_count; i++) {
+    VDFNode *n = node->child_nodes[i];
+    for (size_t i = 0; i < n->item_count; i++) {
+      VDFItem *item = &n->items[i];
+      free(item->k);
+      if (item->v.type == PACKTYPE_STRING) {
+        free(item->v.data.string);
+      }
+    }
+    vdf_clean(n);
+  }
+}
 
 static void vdf_node_add_item(VDFNode *n, VDFItem i) {
   // TODO: make this dynamic
