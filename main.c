@@ -43,8 +43,9 @@ int main(void) {
   Shortcut s;
   s.appid = 2871305054;
   s.app_name = "RainWorld.exe";
-  s.exe = "/hdd/Documents/NotPiracy/Games/Rain.World/Game/files/RainWorld.exe";
-  s.start_dir = "/hdd/Documents/NotPiracy/Games/Rain.World/games/files/";
+  s.exe =
+      "\"/hdd/ocuments/NotPiracy/Games/Rain.World/game/files/RainWorld.exe\"";
+  s.start_dir = "\"/hdd/Documents/NotPiracy/Games/Rain.World/game/files/\"";
   s.icon = "";
   s.shortcut_path = "";
   s.launch_options = "";
@@ -66,9 +67,9 @@ int main(void) {
   ss.capacity = 1;
   ss.len = 1;
 
-	VDFNode *n = shortcuts_to_vdf(&ss);
-	vdf_print_children(n, 0);
-	vdf_serialize(n, "out.vdf");
+  VDFNode *n = shortcuts_to_vdf(&ss);
+  vdf_print_children(n, 0);
+  vdf_serialize(n, "out.vdf");
 }
 
 int main2(int argc, char **argv) {
@@ -92,5 +93,5 @@ int main2(int argc, char **argv) {
   gtk_widget_show_all(window);
   gtk_main();
 
-	return 0;
+  return 0;
 }
